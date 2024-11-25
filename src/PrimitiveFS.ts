@@ -3,27 +3,28 @@ import { FileStorage } from "./domain/interfaces";
 export class PrimitiveFileStorage implements FileStorage {
   fileStorage;
 
-  constructor(data: Record<string, string>) {
+  constructor(data: Record<string, string | undefined>) {
     this.fileStorage = data;
   }
 
-  async read(name: string): Promise<any> {
-    return this.fileStorage[name];
+  async read(path: string): Promise<any> {
+    return this.fileStorage[path];
   }
 
-  async write(name: string, content: string): Promise<boolean> {
-    this.fileStorage[name] = content;
+  async write(path: string, content: string): Promise<boolean> {
+    this.fileStorage[path] = content;
 
     return true;
   }
 
-  async remove(name: string): Promise<boolean> {
-    delete this.fileStorage[name];
+  async remove(path: string): Promise<boolean> {
+    delete this.fileStorage[path];
     return true;
   }
 
-  async exist(name: string): Promise<boolean> {
-    return Boolean(this.fileStorage[name]);
+  async isDir(path: string): Promise<boolean> {
+    // console.log(Object.keys(this.fileStorage), path, this.fileStorage[path]);
+    return Object.keys(this.fileStorage).includes(path) && !this.fileStorage[path];
   }
 
   async list(path: string): Promise<string[]> {

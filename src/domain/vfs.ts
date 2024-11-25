@@ -42,13 +42,42 @@ export class VFS {
 
   async open(path: string) {
     const dentry = await this.find(path);
-    console.log(dentry);
+
     if (dentry.indexNode.type === "file") {
       const content = await this.fileStorage.read(path);
       return content;
     }
 
     throw new Error(`Cannot open directory as file: ${path}`);
+  }
+
+  async create(path: string, content: string) {
+    const dentry = await this.find(path);
+    return await this.fileStorage.write(dentry.getDentryPath(), content);
+  }
+
+  async touch(path: string, content: string) {
+    if (!content) {
+      throw new Error("content is required to create file");
+    }
+
+    const isWritten = await this.fileStorage.write(path, content);
+
+    if (isWritten) {
+      return await this.find(path);
+    }
+
+    throw new Error("touch method error");
+  }
+
+  async mkdir(path: string) {
+    const isWritten = await this.fileStorage.write(path);
+
+    if (isWritten) {
+      return await this.find(path);
+    }
+
+    throw new Error("mkdir method error");
   }
 
   async scanDir(path: string): Promise<DEntry[] | null> {
@@ -128,7 +157,9 @@ export class VFS {
   async remove(name: string): Promise<boolean> {
     const dentry = await this.find(name);
 
-    const isRemovedFromStorage = await this.fileStorage.remove(dentry.getDentryPath());
+    const isRemovedFromStorage = await this.fileStorage.remove(
+      dentry.getDentryPath()
+    );
 
     if (!isRemovedFromStorage) {
       throw new Error(`Error removing record from storage: ${name}`);

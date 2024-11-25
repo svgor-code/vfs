@@ -5,8 +5,11 @@ import { PrimitiveFileStorage } from "./PrimitiveFS";
 import { FileStorage } from "./domain/interfaces";
 
 const mockData = {
+  "/": undefined,
   "/index": "Tratr-trasdf-dsfs",
+  "/dir": undefined,
   "/dir/second": "asdd asdd",
+  "/dir/subdir": undefined,
   "/dir/subdir/file1": "some content",
   "/dir/subdir/file2": "another content",
 };
@@ -41,8 +44,8 @@ describe("vfs test", () => {
 
     const isMoved = await vfs.move(filePath, targetPath);
 
-    const isExistInFS = await primitiveFS.exist("/file1");
-    const isExistInFSOldPath = await primitiveFS.exist(filePath);
+    const isExistInFS = Boolean(await primitiveFS.read("/file1"));
+    const isExistInFSOldPath = Boolean(await primitiveFS.read(filePath));
 
     assert.ok(isMoved);
     assert.ok(isExistInFS);
@@ -55,7 +58,7 @@ describe("vfs test", () => {
     );
 
     assert.equal(newEntry?.parent?.name, "/");
-    assert.deepStrictEqual(parsedTargetEntries, ["index", "dir", "file1"]);
+    assert.deepStrictEqual(parsedTargetEntries, ["", "index", "dir", "file1"]);
 
     const scanResultOldPath = await vfs.scanDir("/dir/subdir");
     const parsedOldPathEntries = scanResultOldPath?.map(
@@ -70,8 +73,8 @@ describe("vfs test", () => {
     const targetPath = "/dir/subdir/";
 
     const isMoved = await vfs.move(filePath, targetPath);
-    const isExistInFS = await primitiveFS.exist("/dir/subdir/index");
-    const isExistInFSOldPath = await primitiveFS.exist(filePath);
+    const isExistInFS = Boolean(await primitiveFS.read("/dir/subdir/index"));
+    const isExistInFSOldPath = Boolean(await primitiveFS.read(filePath));
 
     assert.ok(isMoved);
     assert.ok(isExistInFS);
@@ -91,7 +94,7 @@ describe("vfs test", () => {
       (dentry) => dentry.name
     );
 
-    assert.deepStrictEqual(parsedOldPathEntries, ["dir"]);
+    assert.deepStrictEqual(parsedOldPathEntries, ["", "dir"]);
   });
 
   it("should remove file", async () => {
@@ -104,9 +107,9 @@ describe("vfs test", () => {
     assert.ok(isDeleted);
     assert.ok(isDeleted2);
 
-    const isExistFile = await primitiveFS.exist(filePath);
-    const isExistFile2 = await primitiveFS.exist(filePath2);
-    
+    const isExistFile = Boolean(await primitiveFS.read(filePath));
+    const isExistFile2 = Boolean(await primitiveFS.read(filePath2));
+
     assert.ok(!isExistFile);
     assert.ok(!isExistFile2);
 
@@ -119,5 +122,22 @@ describe("vfs test", () => {
 
     assert.ok(fileNotInDir);
     assert.ok(fileNotInDir2);
+  });
+
+  it("should create file and dir", async () => {
+    const newDirPath = "/dir/newdir";
+    const newFilePath = "/dir/newdir/touched";
+
+    const fileContent = "test content";
+
+    const dirDentry = await vfs.mkdir(newDirPath);
+    const fileDentry = await vfs.touch(newFilePath, "test content");
+
+    assert.equal(dirDentry.indexNode.type, "directory");
+    assert.equal(fileDentry.indexNode.type, "file");
+
+    const content = await primitiveFS.read(newFilePath);
+
+    assert.equal(content, fileContent);
   });
 });

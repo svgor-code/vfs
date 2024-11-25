@@ -2,16 +2,15 @@ import { FileStorage } from "./interfaces";
 
 export class INode {
   fileStorage: FileStorage;
-  type: 'directory' | 'file';
-  
+  type: "directory" | "file";
+
   constructor(fileStorage: FileStorage) {
     this.fileStorage = fileStorage;
   }
 
   async setType(path: string) {
-    const fileExist = await this.fileStorage.exist(path);
-    console.log('path =======',path, fileExist)
-    this.type = fileExist ? 'file' : 'directory';
+    const isDir = await this.fileStorage.isDir(path);
+    this.type = isDir ? "directory" : "file";
 
     return this.type;
   }
