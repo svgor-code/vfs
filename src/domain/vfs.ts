@@ -40,6 +40,7 @@ export class VFS {
     return currentDentry;
   }
 
+  // TODO: change method main to read
   async open(path: string) {
     const dentry = await this.find(path);
 
@@ -71,7 +72,7 @@ export class VFS {
   }
 
   async mkdir(path: string) {
-    const isWritten = await this.fileStorage.write(path);
+    const isWritten = await this.fileStorage.write(path, null);
 
     if (isWritten) {
       return await this.find(path);

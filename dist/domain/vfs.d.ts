@@ -8,6 +8,8 @@ export declare class VFS {
     find(path: string): Promise<DEntry>;
     open(path: string): Promise<any>;
     create(path: string, content: string): Promise<boolean>;
+    touch(path: string, content: string): Promise<DEntry>;
+    mkdir(path: string): Promise<DEntry>;
     scanDir(path: string): Promise<DEntry[] | null>;
     move(name: string, target: string): Promise<boolean>;
     remove(name: string): Promise<boolean>;

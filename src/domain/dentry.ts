@@ -24,7 +24,7 @@ export class DEntry {
     }
   }
 
-  getDentryPath() {
+  public getDentryPath() {
     let currentDentry: DEntry = this;
     let path = currentDentry.name;
 
